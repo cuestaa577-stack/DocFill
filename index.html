@@ -43,10 +43,8 @@
     </button>
   </div>
   <div class="top-actions">
-    <label class="btn primary">
-      Abrir documento
-      <input type="file" id="fileInput" accept="application/pdf,image/*" hidden />
-    </label>
+    <button class="btn primary" id="btnAbrirDoc" type="button">Abrir documento</button>
+    <input type="file" id="fileInput" accept="application/pdf,image/*" hidden />
     <button class="btn" id="btnPrint" title="Imprimir tal como se verá en papel">Imprimir</button>
     <button class="btn" id="btnSaveProject" title="Guardar proyecto (.docfill)">Guardar proyecto</button>
     <label class="btn" title="Cargar proyecto">
@@ -171,15 +169,15 @@
     <button id="mobNext" aria-label="Página siguiente">›</button>
   </div>
   <section class="viewer" id="viewer">
-    <div class="dropzone" id="dropzone">
+    <label class="dropzone" id="dropzone" for="fileInput">
       <div class="drop-inner">
         <div class="drop-ico"><svg viewBox="0 0 24 24"><path d="M6 2.8h7.2L19 8.6v12.6H6z"/><path d="M13 2.8v6h6"/><path d="M9 13h6M9 16.4h6"/></svg></div>
         <h2>Cargar documento</h2>
         <p><strong>PDF, fotos y otros archivos</strong> — toca aquí o arrástralo</p>
         <p class="tiny">Hasta 200 MB por archivo y 300 DPI de salida. Se procesa en tu dispositivo: tus documentos no se suben a ningún servidor.</p>
-        <button class="btn primary" id="btnPickFile" type="button" style="margin-top:14px">Elegir archivo</button>
+        <span class="btn primary" id="btnPickFile" style="margin-top:14px">Elegir archivo</span>
       </div>
-    </div>
+    </label>
     <div class="page-wrap" id="pageWrap"></div>
   </section>
 
