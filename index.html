@@ -88,6 +88,47 @@
   </div>
 </header>
 
+
+<nav class="menubar" id="menubar">
+  <button class="mb-item" data-menu="archivo">Archivo</button>
+  <button class="mb-item" data-menu="editar">Editar</button>
+  <button class="mb-item" data-menu="imagen">Imagen</button>
+  <button class="mb-item" data-menu="ver">Ver</button>
+  <button class="mb-item" data-menu="ayuda">Ayuda</button>
+
+  <div class="mb-drop" data-drop="archivo">
+    <button class="mb-opt" data-click="btnAbrirDoc">Abrir documento…<span>Ctrl+O</span></button>
+    <button class="mb-opt" data-click="btnSaveProject">Guardar proyecto</button>
+    <button class="mb-opt" data-open="projectInput">Abrir proyecto…</button>
+    <div class="mb-sep"></div>
+    <button class="mb-opt" data-click="btnExport">Exportar…</button>
+    <button class="mb-opt" data-click="btnPrint">Imprimir<span>Ctrl+P</span></button>
+  </div>
+
+  <div class="mb-drop" data-drop="editar">
+    <button class="mb-opt" data-tool="select">Seleccionar<span>V</span></button>
+    <button class="mb-opt" data-tool="text">Nueva caja de texto<span>T</span></button>
+    <button class="mb-opt" data-tool="pick">Tomar texto del documento<span>E</span></button>
+    <button class="mb-opt" data-tool="erase">Borrar zona<span>B</span></button>
+  </div>
+
+  <div class="mb-drop" data-drop="imagen">
+    <button class="mb-opt" data-tool="image">Insertar imagen<span>I</span></button>
+    <button class="mb-opt" data-tool="bg">Quitar fondo<span>F</span></button>
+    <button class="mb-opt" data-click="btnOcr">Reconocer texto<span>O</span></button>
+  </div>
+
+  <div class="mb-drop" data-drop="ver">
+    <button class="mb-opt" data-click="btnVista">Vista escritorio / teléfono</button>
+    <button class="mb-opt" data-click="dockLeft">Mostrar herramientas</button>
+    <button class="mb-opt" data-click="dockRight">Mostrar datos</button>
+  </div>
+
+  <div class="mb-drop" data-drop="ayuda">
+    <button class="mb-opt" data-click="btnHelp">Tutorial de uso</button>
+  </div>
+</nav>
+
 <main class="app">
 
   <aside class="panel left">
