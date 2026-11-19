@@ -2668,6 +2668,30 @@ function initExportUI() {
 /* =========================================================
    SOLICITUDES DE DATOS (foto / firma / huella)
    ========================================================= */
+
+/* El WebView de algunos telefonos no abre el selector de archivos.
+   En el APK se usa el selector nativo: el archivo llega por /localfile. */
+window.__onNativeFile = async function (url, nombre) {
+  try {
+    toast('Leyendo ' + nombre + '…');
+    const r = await fetch(url + '?t=' + Date.now());
+    const blob = await r.blob();
+    const f = new File([blob], nombre || 'documento', { type: blob.type || '' });
+    await abrirArchivo(f);
+  } catch (e) {
+    console.error(e);
+    toast('No se pudo leer el archivo elegido.', 'err');
+  }
+};
+
+function elegirArchivo() {
+  if (window.AndroidPick && typeof window.AndroidPick.open === 'function') {
+    try { window.AndroidPick.open(); return; } catch (e) { /* sigue abajo */ }
+  }
+  const inp = document.querySelector('#fileInput');
+  if (inp) inp.click();
+}
+
 const API_BASE = '';
 /* Direccion publica donde vive la pagina de captura.
    Dentro del APK el origen es 127.0.0.1 (solo este telefono), asi que los
@@ -3464,12 +3488,13 @@ function init() {
   });
   const dz = $('#dropzone');
   if (dz) dz.addEventListener('click', (e) => {
-    if (e.target.closest('#btnPickFile') || e.target === dz || e.target.closest('.drop-inner')) {
-      $('#fileInput').click();
-    }
+    e.preventDefault();
+    elegirArchivo();
   });
   const bp = $('#btnPickFile');
-  if (bp) bp.addEventListener('click', (e) => { e.stopPropagation(); $('#fileInput').click(); });
+  if (bp) bp.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); elegirArchivo(); });
+  const abrir = $('#btnAbrirDoc');
+  if (abrir) abrir.addEventListener('click', (e) => { e.preventDefault(); elegirArchivo(); });
   restaurarAutoguardado();
   $('#projectInput').addEventListener('change', (e) => loadProject(e.target.files[0]));
   $('#btnSaveProject').addEventListener('click', saveProject);
