@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0e1116" />
+<title>superEditor · Envío de datos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%232f6bff'/%3E%3Ctext x='20' y='27' font-family='Arial' font-size='18' font-weight='bold' fill='white' text-anchor='middle'%3EsE%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="capture.css" />
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="logo">sE</div>
+    <div>
+      <h1 id="reqTitle">superEditor</h1>
+      <p id="reqSub">Completa los 3 pasos. Puedes repetir cada uno hasta que quede bien.</p>
+    </div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <!-- ============ INICIO / ERROR ============ -->
+  <div id="viewLoad" class="card">
+    <div class="loading"><div class="spin"></div> Cargando solicitud…</div>
+  </div>
+
+  <div id="viewError" class="card hidden">
+    <h2>Enlace no válido</h2>
+    <p class="sub" id="errMsg">Este enlace no existe o ya fue cerrado. Pide uno nuevo a quien te lo envió.</p>
+  </div>
+
+  <!-- ============ MENÚ DE 3 OPCIONES ============ -->
+  <div id="viewMenu" class="card hidden">
+    <h2>Tus 3 pasos</h2>
+    <p class="sub">Toca cada opción para completarla. Puedes repetirla hasta que quede bien.</p>
+
+    <div class="menu-list">
+      <button class="menu-item" data-go="0">
+        <span class="mi-ico">
+          <svg viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 015.5 6h1.7l1.2-1.6h6.2L15.8 6h2.7A2.5 2.5 0 0121 8.5v8A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5z"/><circle cx="12" cy="12.5" r="3.6"/></svg>
+        </span>
+        <span class="mi-txt"><b>Tomar foto</b><small>Fondo blanco automático · tamaño 3×4</small></span>
+        <span class="mi-st" data-st="photo">Pendiente</span>
+      </button>
+      <button class="menu-item" data-go="1">
+        <span class="mi-ico">
+          <svg viewBox="0 0 24 24"><path d="M4 20l4.2-1 10.4-10.4a2.2 2.2 0 000-3.1l-.1-.1a2.2 2.2 0 00-3.1 0L5 15.8z"/><path d="M14.2 6.6l3.2 3.2"/><path d="M4 20h16"/></svg>
+        </span>
+        <span class="mi-txt"><b>Escribe aquí tu firma</b><small>Con el dedo o una foto de la galería</small></span>
+        <span class="mi-st" data-st="signature">Pendiente</span>
+      </button>
+      <button class="menu-item" data-go="2">
+        <span class="mi-ico">
+          <svg viewBox="0 0 24 24"><path d="M12 3.5c-2.6 0-4.6 2-4.6 4.6v2.1"/><path d="M7.4 15.4v-5.2"/><path d="M12 3.5c2.6 0 4.6 2 4.6 4.6v5.3c0 3.6-2 6.6-4.6 6.6"/><path d="M16.6 15.6c0 2.2-.9 4-2.3 5.1"/><path d="M9.5 9.2c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5v4.6c0 2.6-1.1 4.6-2.5 4.6"/><path d="M12 11.4v3.3"/></svg>
+        </span>
+        <span class="mi-txt"><b>Presiona acá tu dedo pulgar derecho</b><small>Sensor digital · huella en tinta negra</small></span>
+        <span class="mi-st" data-st="fingerprint">Pendiente</span>
+      </button>
+    </div>
+
+    <div class="btn-row" style="margin-top:16px;">
+      <button class="btn primary" id="btnStartMenu">Empezar</button>
+    </div>
+  </div>
+
+  <!-- ============ PASO 1: FOTO ============ -->
+  <div id="viewPhoto" class="card hidden">
+    <h2>1. Toma tu foto</h2>
+    <p class="sub">Toma una foto de frente, con buena luz y de cuerpo completo hasta el pecho. Le quitaremos el fondo automáticamente y quedará en <strong>fondo blanco, tamaño 3×4</strong> (carné), <strong>sin recortar la cara ni el cuerpo</strong>.</p>
+
+    <div id="photoPick">
+      <div class="drop">
+        <div class="ico">
+          <svg viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 015.5 6h1.7l1.2-1.6h6.2L15.8 6h2.7A2.5 2.5 0 0121 8.5v8A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5z"/><circle cx="12" cy="12.5" r="3.6"/></svg>
+        </div>
+        <p><strong>Elige una opción</strong></p>
+        <p>Puedes usar la cámara o escoger de tu galería</p>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn primary" id="btnCamera">Tomar foto</button>
+        <button class="btn" id="btnGallery">De la galería</button>
+      </div>
+      <input type="file" id="fileCamera" accept="image/*" capture="user" hidden />
+      <input type="file" id="fileGallery" accept="image/*" hidden />
+    </div>
+
+    <div id="photoEdit" class="hidden">
+      <div class="preview" id="photoPreview"></div>
+
+      <div class="ctrl">
+        <label>Fondo quitado <b id="tolVal">28</b></label>
+        <input type="range" id="tol" min="8" max="90" value="28" />
+      </div>
+      <div class="ctrl">
+        <label>Suavizar borde <b id="featVal">2</b></label>
+        <input type="range" id="feather" min="0" max="6" value="2" />
+      </div>
+      <div class="chips">
+        <div class="chip on" id="chipAuto">Quitar fondo: sí</div>
+        <div class="chip" id="chipBrush">Corregir con dedo</div>
+      </div>
+
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn" id="btnRetakePhoto">Repetir</button>
+        <button class="btn ok" id="btnUsePhoto">Usar esta foto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PASO 2: FIRMA ============ -->
+  <div id="viewSign" class="card hidden">
+    <h2>2. Escribe aquí tu firma</h2>
+    <p class="sub">Elige cómo quieres darla. En los tres casos se convierte a <strong>tinta negra real</strong>.</p>
+
+    <div class="mode-row" id="signModeChips">
+      <button class="mode-btn on" data-mode="draw">
+        <svg viewBox="0 0 24 24"><path d="M4 20l4.2-1 10.4-10.4a2.2 2.2 0 000-3.1l-.1-.1a2.2 2.2 0 00-3.1 0L5 15.8z"/><path d="M14.2 6.6l3.2 3.2"/></svg>
+        <span>Firmar con el dedo</span>
+      </button>
+      <button class="mode-btn" data-mode="photo">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M4 17l5-5 3.5 3.5L16 12l4 4.5"/></svg>
+        <span>Buscar en galería</span>
+      </button>
+    </div>
+
+    <div id="signDraw" style="margin-top:14px;">
+      <div class="sigwrap" id="sigwrap">
+        <canvas id="sigcanvas" width="900" height="380"></canvas>
+        <div class="sighint" id="sighint">Firma aquí</div>
+        <div class="sigline"></div>
+      </div>
+      <div class="ctrl">
+        <label>Grosor del trazo <b id="penVal">3.2</b></label>
+        <input type="range" id="pen" min="15" max="70" value="32" />
+      </div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn" id="btnClearSig">Borrar y repetir</button>
+        <button class="btn ok" id="btnUseSigDraw">Usar esta firma</button>
+      </div>
+    </div>
+
+    <div id="signPhoto" class="hidden">
+      <div class="drop">
+        <div class="ico">
+          <svg viewBox="0 0 24 24"><path d="M4 20l4.2-1 10.4-10.4a2.2 2.2 0 000-3.1l-.1-.1a2.2 2.2 0 00-3.1 0L5 15.8z"/><path d="M14.2 6.6l3.2 3.2"/></svg>
+        </div>
+        <p><strong>Foto de tu firma en papel</strong></p>
+        <p>Fondo claro, tinta oscura, sin sombras</p>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn" id="btnSigCam">Tomar foto</button>
+        <button class="btn primary" id="btnSigGal">Buscar en la galería</button>
+      </div>
+      <input type="file" id="sigFileCam" accept="image/*" capture="environment" hidden />
+      <input type="file" id="sigFileGal" accept="image/*" hidden />
+
+      <div id="sigPhotoEdit" class="hidden" style="margin-top:14px;">
+        <div class="preview" id="sigPhotoPreview"></div>
+        <div class="ctrl">
+          <label>Intensidad de tinta <b id="sigInkVal">55</b></label>
+          <input type="range" id="sigInk" min="10" max="95" value="55" />
+        </div>
+        <div class="btn-row" style="margin-top:12px;">
+          <button class="btn" id="btnSigPhotoRetry">Repetir</button>
+          <button class="btn ok" id="btnUseSigPhoto">Usar esta firma</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PASO 3: HUELLA ============ -->
+  <div id="viewFinger" class="card hidden">
+    <h2>3. Presiona acá tu dedo pulgar derecho</h2>
+    <p class="sub">Usa el <strong>sensor digital</strong>: coloca el pulgar entintado frente a la cámara y la app captura la huella sola, en <strong>tinta negra</strong>.</p>
+
+    <div class="mode-row" id="fpModeChips">
+      <button class="mode-btn on" data-fpmode="sensor">
+        <svg viewBox="0 0 24 24"><path d="M12 3.5c-2.6 0-4.6 2-4.6 4.6v2.1"/><path d="M7.4 15.4v-5.2"/><path d="M12 3.5c2.6 0 4.6 2 4.6 4.6v5.3c0 3.6-2 6.6-4.6 6.6"/><path d="M16.6 15.6c0 2.2-.9 4-2.3 5.1"/><path d="M9.5 9.2c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5v4.6c0 2.6-1.1 4.6-2.5 4.6"/><path d="M12 11.4v3.3"/></svg>
+        <span>Sensor de huella</span>
+      </button>
+      <button class="mode-btn" data-fpmode="photo">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M4 17l5-5 3.5 3.5L16 12l4 4.5"/></svg>
+        <span>Foto de galería</span>
+      </button>
+    </div>
+
+    <div id="fpSensor" style="margin-top:14px;">
+      <div class="fp-stage">
+        <video id="fpVideo" playsinline muted autoplay></video>
+        <div class="fp-mask"></div>
+        <div class="fp-ring"></div>
+        <div class="fp-scan" id="fpScan"></div>
+        <div class="fp-hint" id="fpHint">Coloca el pulgar dentro del círculo</div>
+      </div>
+      <div class="fp-status" id="fpStatus">Sensor apagado</div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="btn primary" id="btnFpStart">Activar sensor</button>
+        <button class="btn hidden" id="btnFpCapture">Capturar ahora</button>
+      </div>
+      <div class="tip" style="margin-top:12px;">
+        <b>Cómo usarlo:</b> entinta el pulgar con poca tinta, estampa la huella en una hoja blanca y pon la hoja frente a la cámara, a unos 10 cm. El sensor enfoca y captura solo cuando la huella se ve nítida.
+      </div>
+      <div class="tip">
+        <b>Nota técnica:</b> el lector biométrico del teléfono no comparte la imagen de la huella con las páginas web. Por eso el sensor usa la cámara en modo macro, que entrega la huella en negro sobre blanco igual que en el papel.
+      </div>
+    </div>
+
+    <div id="fingerPick" class="hidden">
+      <div class="drop">
+        <div class="ico">
+          <svg viewBox="0 0 24 24"><path d="M12 3.5c-2.6 0-4.6 2-4.6 4.6v2.1"/><path d="M7.4 15.4v-5.2"/><path d="M12 3.5c2.6 0 4.6 2 4.6 4.6v5.3c0 3.6-2 6.6-4.6 6.6"/><path d="M16.6 15.6c0 2.2-.9 4-2.3 5.1"/><path d="M9.5 9.2c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5v4.6c0 2.6-1.1 4.6-2.5 4.6"/><path d="M12 11.4v3.3"/></svg>
+        </div>
+        <p><strong>Foto de la huella en papel</strong></p>
+        <p>De cerca, enfocada y sin reflejos</p>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn primary" id="btnFingerCam">Tomar foto</button>
+        <button class="btn" id="btnFingerGal">De la galería</button>
+      </div>
+      <input type="file" id="fingerFileCam" accept="image/*" capture="environment" hidden />
+      <input type="file" id="fingerFileGal" accept="image/*" hidden />
+    </div>
+
+    <div id="fingerEdit" class="hidden">
+      <div class="preview" id="fingerPreview"></div>
+      <div class="ctrl">
+        <label>Contraste de crestas <b id="fpConVal">50</b></label>
+        <input type="range" id="fpCon" min="5" max="95" value="50" />
+      </div>
+      <div class="ctrl">
+        <label>Limpieza de manchas <b id="fpCleanVal">30</b></label>
+        <input type="range" id="fpClean" min="0" max="90" value="30" />
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn" id="btnFingerRetry">Repetir</button>
+        <button class="btn ok" id="btnUseFinger">Usar esta huella</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RESUMEN / ENVÍO ============ -->
+  <div id="viewReview" class="card hidden">
+    <h2>Revisa y envía</h2>
+    <p class="sub">Si algo no te gusta, puedes corregirlo antes de enviar.</p>
+    <label class="consent" style="display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:13px;line-height:1.4;text-align:left">
+      <input type="checkbox" id="consentBox" style="margin-top:3px;width:18px;height:18px;flex:0 0 auto" />
+      <span>Autorizo que estos datos se usen <b>solo para completar mi trámite</b>. Se guardan cifrados y se borran cuando el trámite termina o a los 30 días.</span>
+    </label>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="ctrl" style="margin-top:16px;">
+      <label>Tu nombre completo</label>
+      <input type="text" id="personName" placeholder="Escribe tu nombre"
+        style="width:100%;background:#0d1219;border:1px solid var(--line);color:#fff;
+        border-radius:10px;padding:12px;font-size:14px;font-family:inherit;" />
+    </div>
+
+    <div id="sendErr" class="err hidden"></div>
+  </div>
+
+  <!-- ============ FINAL ============ -->
+  <div id="viewDone" class="card hidden">
+    <div class="done-box">
+      <div class="big">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.4l2.6 2.6L16 9.6"/></svg>
+      </div>
+      <h2>¡Datos enviados!</h2>
+      <p>Tu foto, firma y huella se enviaron correctamente.<br/>Ya puedes cerrar esta página.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="foot" id="foot"></div>
+
+<script src="capture.js"></script>
+</body>
+</html>
