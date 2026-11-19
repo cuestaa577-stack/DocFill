@@ -2669,6 +2669,21 @@ function initExportUI() {
    SOLICITUDES DE DATOS (foto / firma / huella)
    ========================================================= */
 const API_BASE = '';
+/* Direccion publica donde vive la pagina de captura.
+   Dentro del APK el origen es 127.0.0.1 (solo este telefono), asi que los
+   enlaces se arman con la copia publicada en GitHub Pages. */
+const BASE_PUBLICA = 'https://cuestaa577-stack.github.io/DocFill/';
+function origenPublico() {
+  const host = location.hostname;
+  const local = !host || host === '127.0.0.1' || host === 'localhost' || location.protocol === 'file:';
+  if (local) return BASE_PUBLICA;
+  return location.origin + location.pathname.replace(/[^/]*$/, '');
+}
+function esOrigenLocal() {
+  const host = location.hostname;
+  return !host || host === '127.0.0.1' || host === 'localhost' || location.protocol === 'file:';
+}
+
 let lastEventTs = Date.now() / 1000;
 let unreadCount = 0;
 let pollTimer = null;
@@ -2812,15 +2827,14 @@ async function createRequest() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ label: titulo, owner: ownerId(), steps }),
     });
-    link = location.origin + res.path;
+    link = origenPublico().replace(/\/$/, '') + res.path;
   } catch (e) {
     // 2) Sin servidor: enlace autónomo. La persona captura y devuelve un paquete
     //    que se importa aquí, así el enlace SIEMPRE se genera.
     mode = 'local';
     const token = 'local_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     const payload = { t: token, label: titulo, steps, ts: Math.floor(Date.now() / 1000) };
-    const dir = location.pathname.replace(/[^/]*$/, '');
-    link = location.origin + dir + 'captura.html#r=' + b64uEncode(JSON.stringify(payload));
+    link = origenPublico() + 'captura.html#r=' + b64uEncode(JSON.stringify(payload));
 
     const arr = getLocalSessions();
     arr.unshift({
@@ -2840,7 +2854,11 @@ function showLinkDialog(link, label, mode) {
     (label ? label + '\n\n' : '') +
     'Hola, necesito tu foto, firma y huella. Abre este enlace y sigue los pasos:\n' + link
   );
-  const nota = mode === 'local'
+  const nota = (mode === 'local' && esOrigenLocal())
+    ? 'Este enlace abre la copia publica del formulario, funciona en cualquier telefono. ' +
+      'La persona completa foto, firma y huella y al final te devuelve un archivo que importas ' +
+      'con “Importar datos recibidos”.'
+    : mode === 'local'
     ? 'Enlace autónomo (funciona sin servidor). La persona verá 3 opciones: <b>Tomar foto</b>, ' +
       '<b>Escribe aquí tu firma</b> y <b>Presiona acá tu dedo pulgar derecho</b>. Al terminar ' +
       'te devuelve un archivo que importas con “Importar datos recibidos”.'
@@ -2878,7 +2896,7 @@ function linkForSession(s) {
   if (s.local) {
     const payload = { t: s.token, label: s.label, steps: s.steps, ts: s.created };
     const dir = location.pathname.replace(/[^/]*$/, '');
-    return location.origin + dir + 'captura.html#r=' + b64uEncode(JSON.stringify(payload));
+    return origenPublico() + 'captura.html#r=' + b64uEncode(JSON.stringify(payload));
   }
   return location.origin + '/captura.html?t=' + s.token;
 }
