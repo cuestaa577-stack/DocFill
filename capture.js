@@ -1061,6 +1061,11 @@ function bindUI() {
    ========================================================= */
 const FP = { stream: null, raf: null, timer: null, running: false, good: 0, busy: false };
 
+function fpAvisoCamara() {
+  fpSetStatus('No se pudo abrir la cámara. Revisa el permiso de cámara de la app.', 'bad');
+  toast('Da permiso de cámara a la app para usar el sensor.', true);
+}
+
 function fpSetStatus(msg, cls) {
   const el = $('#fpStatus');
   if (!el) return;
@@ -1122,7 +1127,15 @@ async function fpStartSensor() {
     fpSetStatus('Buscando la huella… acerca la hoja al círculo');
     FP.timer = setInterval(fpAnalyze, 420);
   } catch (e) {
-    fpSetStatus('No se pudo abrir la cámara. Revisa el permiso o usa "Foto de galería".', 'warn');
+    console.warn('sensor:', e);
+    const nombre = String((e && e.name) || '');
+    if (nombre === 'NotAllowedError' || nombre === 'SecurityError') {
+      fpAvisoCamara();
+    } else if (nombre === 'NotFoundError' || nombre === 'OverconstrainedError') {
+      fpSetStatus('No encuentro una cámara disponible en este teléfono.', 'warn');
+    } else {
+      fpSetStatus('No se pudo abrir la cámara: ' + (e && e.message ? e.message : 'error'), 'warn');
+    }
     fpStopSensor();
   }
 }
