@@ -55,9 +55,6 @@
     </label>
     <button class="btn" id="btnVista" type="button" title="Cambiar entre vista de escritorio y de teléfono">Vista: escritorio</button>
     <button class="btn helpbtn" id="btnHelp" title="Ver el tutorial de uso">?</button>
-    <button class="btn reqbtn" id="btnRequests">
-      Solicitudes <span class="notif-badge" id="notifBadge" hidden>0</span>
-    </button>
     <button class="btn only-mobile" id="btnMore" title="Más opciones">⋯</button>
     <div class="export-wrap">
       <button class="btn accent" id="btnExport">Exportar ▾</button>
@@ -223,35 +220,7 @@
 </nav>
 
 <!-- ===== MODAL DE SOLICITUDES ===== -->
-<div class="modal-back" id="reqModal">
-  <div class="modal wide">
-    <div class="modal-head">
-      <h3>Solicitudes de datos</h3>
-      <button class="modal-x" id="reqClose">×</button>
-    </div>
-    <div class="modal-body">
 
-      <div class="req-create">
-        <div class="rc-title">Nueva solicitud</div>
-        <input type="text" id="reqLabel" class="rc-input"
-               placeholder="Ej: Juan Pérez — expediente 123" />
-        <div class="rc-steps">
-          <label class="rc-check"><input type="checkbox" id="stPhoto" checked /> Foto</label>
-          <label class="rc-check"><input type="checkbox" id="stSign" checked /> Firma</label>
-          <label class="rc-check"><input type="checkbox" id="stFinger" checked /> Huella</label>
-        </div>
-        <button class="btn primary full" id="reqCreate">Crear enlace y enviar</button>
-        <button class="btn full" id="reqImport" style="margin-top:8px;">Importar datos recibidos (.json)</button>
-        <input type="file" id="reqImportFile" accept=".json,application/json" hidden />
-      </div>
-
-      <div class="rc-title" style="margin-top:18px;">Enviadas</div>
-      <div id="reqList" class="req-list">
-        <p class="empty">Todavía no has creado solicitudes.</p>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ===== MODAL DE DATOS RECIBIDOS ===== -->
 <div class="modal-back" id="dataModal">
