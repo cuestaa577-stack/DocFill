@@ -3113,6 +3113,7 @@ async function importPackage(file) {
 }
 
 function initRequests() {
+  if (!document.querySelector('#btnRequests')) return;   // sin panel de solicitudes
   const impBtn = $('#reqImport');
   const impFile = $('#reqImportFile');
   if (impBtn && impFile) {
@@ -3473,7 +3474,7 @@ function init() {
   $('#projectInput').addEventListener('change', (e) => loadProject(e.target.files[0]));
   $('#btnSaveProject').addEventListener('click', saveProject);
   initExportUI();
-  initRequests();
+  if (!esOrigenLocal()) initRequests();
   initTour();
   initMobile();
 
