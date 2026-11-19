@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0e1116" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%232f6bff'/%3E%3Ctext x='20' y='27' font-family='Arial' font-size='18' font-weight='bold' fill='white' text-anchor='middle'%3EsE%3C/text%3E%3C/svg%3E" />
+<title>superEditor — Editor de documentos con datos vinculados</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="assets/vendor/pdf.min.js"></script>
+<script src="assets/vendor/pdf-lib.min.js"></script>
+<script src="assets/vendor/jszip.min.js"></script>
+<script>window.TESSERACT_CDN = "https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js";</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+      <defs>
+        <linearGradient id="lgA" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#4f8cff"/>
+          <stop offset="1" stop-color="#1e4fd8"/>
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="38" height="38" rx="10" fill="url(#lgA)"/>
+      <rect x="1" y="1" width="38" height="38" rx="10" fill="none" stroke="rgba(255,255,255,.22)"/>
+      <path d="M25.6 13.4c-1.5-1.1-3.4-1.7-5.4-1.7-3.6 0-5.8 1.8-5.8 4.4 0 2.4 1.8 3.6 5 4.4 2.7.7 3.6 1.2 3.6 2.4 0 1.3-1.2 2.1-3.2 2.1-2 0-3.8-.7-5.3-2l-1.7 2.8c1.8 1.5 4.2 2.3 6.9 2.3 3.9 0 6.4-1.9 6.4-4.7 0-2.5-1.7-3.8-5.2-4.7-2.5-.6-3.4-1.1-3.4-2.2 0-1.1 1-1.8 2.7-1.8 1.6 0 3.1.5 4.4 1.5z" fill="#fff"/>
+      <path d="M29.5 24.9h3.2v-8.6h-3.2zM31.1 12.6a1.9 1.9 0 100 3.8 1.9 1.9 0 000-3.8z" fill="#fff" opacity=".92"/>
+    </svg>
+    <div class="brand-txt">
+      <h1>super<span>Editor</span></h1>
+      <span class="tagline">Escribe un dato una vez · se actualiza en todo el documento</span>
+    </div>
+  </div>
+
+  <div class="only-desktop" style="gap:6px;margin-right:4px">
+    <button class="btn ghost" id="dockLeft" type="button" title="Panel de herramientas">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+    </button>
+    <button class="btn ghost" id="dockRight" type="button" title="Panel de datos">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg>
+    </button>
+  </div>
+  <div class="top-actions">
+    <label class="btn primary">
+      Abrir documento
+      <input type="file" id="fileInput" accept="application/pdf,image/*" hidden />
+    </label>
+    <button class="btn" id="btnPrint" title="Imprimir tal como se verá en papel">Imprimir</button>
+    <button class="btn" id="btnSaveProject" title="Guardar proyecto (.docfill)">Guardar proyecto</button>
+    <label class="btn" title="Cargar proyecto">
+      Cargar
+      <input type="file" id="projectInput" accept=".docfill,.json" hidden />
+    </label>
+    <button class="btn" id="btnVista" type="button" title="Cambiar entre vista de escritorio y de teléfono">Vista: escritorio</button>
+    <button class="btn helpbtn" id="btnHelp" title="Ver el tutorial de uso">?</button>
+    <button class="btn reqbtn" id="btnRequests">
+      Solicitudes <span class="notif-badge" id="notifBadge" hidden>0</span>
+    </button>
+    <button class="btn only-mobile" id="btnMore" title="Más opciones">⋯</button>
+    <div class="export-wrap">
+      <button class="btn accent" id="btnExport">Exportar ▾</button>
+      <div class="export-menu" id="exportMenu">
+        <div class="em-title">Formato</div>
+        <button class="em-item" data-fmt="pdf">
+          <span class="em-ico pdf">PDF</span>
+          <span><strong>PDF</strong><small>Documento vectorial, texto nítido</small></span>
+        </button>
+        <button class="em-item" data-fmt="png">
+          <span class="em-ico png">PNG</span>
+          <span><strong>PNG</strong><small>Sin pérdida, con transparencia</small></span>
+        </button>
+        <button class="em-item" data-fmt="jpg">
+          <span class="em-ico jpg">JPG</span>
+          <span><strong>JPG</strong><small>Comprimido, ideal para enviar</small></span>
+        </button>
+        <button class="em-item" data-fmt="webp">
+          <span class="em-ico webp">W</span>
+          <span><strong>WEBP</strong><small>Ligero para web</small></span>
+        </button>
+        <div class="em-sep"></div>
+        <button class="em-item" id="emSample">
+          <span class="em-ico sample"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 15l4.5-4.5L11 14l3-3 7 7"/><circle cx="8.5" cy="9" r="1.5"/></svg></span>
+          <span><strong>Generar muestra</strong><small>Vista previa con marca de agua “POR ENTREGAR”</small></span>
+        </button>
+        <button class="em-item" id="emOptions">
+          <span class="em-ico opt"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7"/></svg></span>
+          <span><strong>Opciones avanzadas…</strong><small>DPI, calidad, páginas</small></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="app">
+
+  <aside class="panel left">
+    <section class="block">
+      <h2>Herramientas</h2>
+      <div class="tools">
+        <button class="tool active" data-tool="select" title="Mover y seleccionar (V)">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10.6 19z"/></svg><span>Seleccionar</span>
+        </button>
+        <button class="tool" data-tool="text" title="Nueva caja de texto (T)">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16M12 5v14M8.5 19h7"/></svg><span>Texto</span>
+        </button>
+        <button class="tool" data-tool="pick" title="Tomar texto existente del documento (E)">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M4 20l4-1 10-10-3-3L5 16z"/><path d="M14.5 5.5l3 3"/></svg><span>Editar texto</span>
+        </button>
+        <button class="tool" data-tool="erase" title="Borrar zona (arrastra) (B)">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M8 19h12"/><path d="M4.5 15.5l7-7a2 2 0 012.8 0l3.2 3.2a2 2 0 010 2.8l-4.5 4.5H8z"/></svg><span>Borrar zona</span>
+        </button>
+        <button class="tool" data-tool="image" title="Insertar imagen / foto (I)">
+          <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M4 17l5-5 3.5 3.5L16 12l4 4.5"/></svg><span>Imagen</span>
+        </button>
+        <button class="tool" data-tool="bg" title="Quitar el fondo del escaneo o de una foto (F)">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M6.5 16.5l7.8-7.8a2 2 0 012.8 0l1.4 1.4a2 2 0 010 2.8l-5 5H6.5z"/><path d="M13 4.5l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/></svg><span>Quitar fondo</span>
+        </button>
+        <button class="tool" id="btnOcr" title="Reconocer texto en escaneos (O)">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 015.5 4H8M16 4h2.5A1.5 1.5 0 0120 5.5V8M20 16v2.5a1.5 1.5 0 01-1.5 1.5H16M8 20H5.5A1.5 1.5 0 014 18.5V16"/><path d="M8 9h8M8 12.5h8M8 16h5"/></svg><span>Reconocer texto</span>
+        </button>
+      </div>
+      <p class="hint" id="toolHint">Haz clic en cualquier texto del documento para reemplazarlo.</p>
+      <div id="ocrStatus" class="ocr-status hidden"></div>
+    </section>
+
+    <section class="block">
+      <h2>Vista</h2>
+      <div class="row">
+        <button class="btn small" id="zoomOut">−</button>
+        <span class="zoomlabel" id="zoomLabel">120%</span>
+        <button class="btn small" id="zoomIn">+</button>
+        <button class="btn small" id="zoomFit">Ajustar</button>
+      </div>
+      <div class="row pager">
+        <button class="btn small" id="prevPage">‹</button>
+        <span class="zoomlabel"><input id="pageNum" type="number" min="1" value="1" /> / <span id="pageCount">0</span></span>
+        <button class="btn small" id="nextPage">›</button>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Papel</h2>
+      <div class="paper-row">
+        <input type="color" id="paperColor" value="#ffffff" title="Color real del papel" />
+        <div class="paper-meta">
+          <strong id="paperHex">#FFFFFF</strong>
+          <small id="paperState">Abre un documento</small>
+        </div>
+        <button class="btn small" id="paperDetect" title="Volver a detectar el color">Detectar</button>
+      </div>
+      <div class="row two">
+        <button class="btn small" id="paperApplyCovers" title="Usar este color en todos los tapados">Aplicar a tapados</button>
+        <button class="btn small" id="paperAllPages" title="Copiar a todas las páginas">Todas las páginas</button>
+      </div>
+      <label class="switch"><input type="checkbox" id="printPreview" /> Ver como impreso en papel</label>
+      <p class="hint">El color se detecta solo al abrir el documento. Al imprimir, los datos nuevos se funden con el papel real.</p>
+    </section>
+
+    <section class="block grow">
+      <h2>Elementos</h2>
+      <div id="elementList" class="element-list">
+        <p class="empty">Aún no hay elementos.</p>
+      </div>
+    </section>
+  </aside>
+
+  <input type="file" id="imgInput" accept="image/*" hidden />
+
+  <div class="mob-page" id="mobPage">
+    <button id="mobPrev" aria-label="Página anterior">‹</button>
+    <span id="mobPageLabel">1 / 1</span>
+    <button id="mobNext" aria-label="Página siguiente">›</button>
+  </div>
+  <section class="viewer" id="viewer">
+    <div class="dropzone" id="dropzone">
+      <div class="drop-inner">
+        <div class="drop-ico"><svg viewBox="0 0 24 24"><path d="M6 2.8h7.2L19 8.6v12.6H6z"/><path d="M13 2.8v6h6"/><path d="M9 13h6M9 16.4h6"/></svg></div>
+        <h2>Cargar documento</h2>
+        <p><strong>PDF, fotos y otros archivos</strong> — toca aquí o arrástralo</p>
+        <p class="tiny">Hasta 200 MB por archivo y 300 DPI de salida. Se procesa en tu dispositivo: tus documentos no se suben a ningún servidor.</p>
+        <button class="btn primary" id="btnPickFile" type="button" style="margin-top:14px">Elegir archivo</button>
+      </div>
+    </div>
+    <div class="page-wrap" id="pageWrap"></div>
+  </section>
+
+  <aside class="panel right">
+    <section class="block">
+      <h2>Datos del documento <span class="badge" id="varCount">0</span></h2>
+      <p class="hint">Escribe aquí el valor y se actualizará en <strong>todas</strong> las casillas vinculadas.</p>
+      <div id="varList" class="var-list">
+        <p class="empty">Sin datos todavía.</p>
+      </div>
+      <button class="btn ghost full" id="btnAddVar">+ Nuevo dato</button>
+    </section>
+
+    <section class="block grow" id="propsBlock">
+      <h2>Propiedades</h2>
+      <div id="props">
+        <p class="empty">Selecciona un elemento del documento.</p>
+      </div>
+    </section>
+  </aside>
+</main>
+
+<div class="sheet-back" id="sheetBack"></div>
+
+<nav class="mob-bar" id="mobBar">
+  <button type="button" data-sheet="left">
+    <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span>Herramientas</span>
+  </button>
+  <button type="button" data-sheet="right">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="11" cy="18" r="1.8"/></svg><span>Datos</span>
+  </button>
+  <button type="button" id="mobFit">
+    <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Ajustar</span>
+  </button>
+  <button type="button" data-sheet="more">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg><span>Más</span>
+  </button>
+</nav>
+
+<!-- ===== MODAL DE SOLICITUDES ===== -->
+<div class="modal-back" id="reqModal">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3>Solicitudes de datos</h3>
+      <button class="modal-x" id="reqClose">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="req-create">
+        <div class="rc-title">Nueva solicitud</div>
+        <input type="text" id="reqLabel" class="rc-input"
+               placeholder="Ej: Juan Pérez — expediente 123" />
+        <div class="rc-steps">
+          <label class="rc-check"><input type="checkbox" id="stPhoto" checked /> Foto</label>
+          <label class="rc-check"><input type="checkbox" id="stSign" checked /> Firma</label>
+          <label class="rc-check"><input type="checkbox" id="stFinger" checked /> Huella</label>
+        </div>
+        <button class="btn primary full" id="reqCreate">Crear enlace y enviar</button>
+        <button class="btn full" id="reqImport" style="margin-top:8px;">Importar datos recibidos (.json)</button>
+        <input type="file" id="reqImportFile" accept=".json,application/json" hidden />
+      </div>
+
+      <div class="rc-title" style="margin-top:18px;">Enviadas</div>
+      <div id="reqList" class="req-list">
+        <p class="empty">Todavía no has creado solicitudes.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DE DATOS RECIBIDOS ===== -->
+<div class="modal-back" id="dataModal">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3 id="dataTitle">Datos recibidos</h3>
+      <button class="modal-x" id="dataClose">×</button>
+    </div>
+    <div class="modal-body" id="dataBody"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL DE EXPORTACIÓN ===== -->
+<div class="modal-back" id="exportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Exportar documento</h3>
+      <button class="modal-x" id="modalClose">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="prop"><label>Formato</label>
+        <select id="exFmt">
+          <option value="pdf">PDF</option>
+          <option value="png">PNG</option>
+          <option value="jpg">JPG</option>
+          <option value="webp">WEBP</option>
+        </select>
+      </div>
+      <div class="prop"><label>Páginas</label>
+        <select id="exPages">
+          <option value="current">Solo la página actual</option>
+          <option value="all">Todas las páginas</option>
+        </select>
+      </div>
+      <div class="prop" id="exScaleRow"><label>Resolución</label>
+        <select id="exScale">
+          <option value="1">72 DPI — borrador</option>
+          <option value="2">144 DPI — buena</option>
+          <option value="3">216 DPI — alta</option>
+          <option value="4" selected>288 DPI — impresión</option>
+          <option value="4.17">300 DPI — original</option>
+          <option value="6">432 DPI — máxima</option>
+          <option value="8.33">600 DPI — archivo</option>
+        </select>
+      </div>
+      <div class="prop" id="exQualityRow"><label>Calidad</label>
+        <input type="range" id="exQuality" min="50" max="100" value="92" />
+        <span id="exQualityVal" class="qval">92%</span>
+      </div>
+      <div class="prop"><label>Nombre</label>
+        <input type="text" id="exName" placeholder="documento_editado" />
+      </div>
+      <div class="prop"><label>Fondo de papel</label>
+        <input type="checkbox" id="exPaper" checked />
+        <span class="qval" id="exPaperVal">#FFFFFF</span>
+      </div>
+      <p class="hint" id="exNote">El PDF conserva el texto nítido y seleccionable.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="modalCancel">Cancelar</button>
+      <button class="btn accent" id="modalExport">Exportar ahora</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TUTORIAL ===== -->
+<div class="tour" id="tour" hidden>
+  <div class="tour-dim"></div>
+  <div class="tour-spot" id="tourSpot"></div>
+  <div class="tour-badge" id="tourBadge">A</div>
+  <div class="tour-card" id="tourCard">
+    <div class="tour-head">
+      <span class="tour-letter" id="tourLetter">A</span>
+      <div>
+        <h3 id="tourTitle">Título</h3>
+        <p id="tourText">Texto</p>
+      </div>
+    </div>
+    <div class="tour-foot">
+      <span class="tour-count" id="tourCount">1 de 7</span>
+      <div class="tour-btns">
+        <button class="btn small" id="tourPrev">Anterior</button>
+        <button class="btn small primary" id="tourNext">Siguiente</button>
+      </div>
+    </div>
+    <button class="tour-skip" id="tourSkip">Saltar tutorial</button>
+  </div>
+</div>
+
+<!-- ===== PANEL QUITAR FONDO ===== -->
+<div class="bgpanel" id="bgPanel" hidden>
+  <div class="bgp-head">
+    <span class="bgp-swatch" id="bgpSwatch"></span>
+    <div>
+      <strong>Quitar fondo</strong>
+      <small id="bgpInfo">Color muestreado</small>
+    </div>
+    <button class="bgp-x" id="bgpClose">×</button>
+  </div>
+  <label class="bgp-row">
+    <span>Tolerancia</span>
+    <input type="range" id="bgpTol" min="4" max="90" value="26" />
+    <b id="bgpTolVal">26</b>
+  </label>
+  <label class="bgp-row">
+    <span>Suavizar borde</span>
+    <input type="range" id="bgpFeather" min="0" max="6" value="2" />
+    <b id="bgpFeatherVal">2</b>
+  </label>
+  <label class="bgp-check"><input type="checkbox" id="bgpTransparent" /> Dejar fondo transparente (PNG)</label>
+  <div class="bgp-actions">
+    <button class="btn small" id="bgpAuto">Usar color del papel</button>
+    <button class="btn small accent" id="bgpApply">Aplicar</button>
+  </div>
+</div>
+
+<div class="print-area" id="printArea"></div>
+
+<div class="load-overlay" id="loadOverlay">
+  <div class="load-box">
+    <div class="spinner"></div>
+    <span>Abriendo documento…</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
